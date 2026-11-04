@@ -29,11 +29,13 @@ Design a part, slice it and print it on an Ender 3 V2, with Claude Code driving 
    dist/tramline-linux-amd64 print part_PETG.gcode --bed-clear
    ```
 
+   On a Mac the client is `dist/tramline-darwin-arm64`.
+
 ## Not in this repository
 
 These stay on the local machine, see [`.gitignore`](.gitignore):
 
-- The SolidCraft binaries (`solidcraft`, `solidcraft-cli`, `solvecraft-cli`).
+- The SolidCraft binaries on Linux (`solidcraft`, `solidcraft-cli`, `solvecraft-cli`). On a Mac, SolidCraft is an app in `/Applications`.
 - `projects/`, the designs, STLs and G-code.
 - `tramline/dist/`, `tramline/.cache/` and `tramline/test-logs/`. Tramline's engineering notes refer to files in `test-logs/`, and those only exist locally.
 
@@ -41,7 +43,7 @@ Tramline's keys stay out too, in `~/.config/tramline/` on the client and `/var/l
 
 ## Setting up a new computer
 
-Claude Code picks up the skills by itself when started in this folder, but they rely on things git doesn't carry. Run these from the repository root.
+Claude Code picks up the skills by itself when started in this folder, but they rely on things git doesn't carry. Run these from the repository root. It works on Linux and macOS, and the steps say where they differ.
 
 ```bash
 git clone git@github.com:Moudoux/stringing-along.git
@@ -50,10 +52,15 @@ cd stringing-along
 
 ### SolidCraft, for designing
 
-1. Copy the binaries `solidcraft`, `solidcraft-cli` and `solvecraft-cli` into the repository root from a computer that has them.
-2. Connect them to Claude Code:
+1. Install it:
+   - **macOS:** install the SolidCraft app in `/Applications`.
+   - **Linux:** copy the binaries `solidcraft`, `solidcraft-cli` and `solvecraft-cli` into the repository root from a computer that has them.
+2. Connect it to Claude Code:
 
    ```bash
+   # macOS
+   claude mcp add solidcraft -- /Applications/SolidCraft.app/Contents/MacOS/solidcraft-cli mcp
+   # Linux
    claude mcp add solidcraft -- "$PWD/solidcraft-cli" mcp
    ```
 
@@ -61,7 +68,12 @@ cd stringing-along
 
 ### Cura, for slicing
 
-Install Cura 5.13 at `/opt/ultimaker-cura`, the one path that isn't relative, as it's where the scripts expect Cura's engine. You also need Python 3 and bash.
+Install Cura 5.13, as the scripts run the engine inside it and expect it in one place. These are the only paths that aren't relative:
+
+- **macOS:** `/Applications/UltiMaker Cura.app`, the usual place. Set `CURA_APP` if it's somewhere else. Cura has no command of its own to put on the PATH, and doesn't need one.
+- **Linux:** `/opt/ultimaker-cura`.
+
+Older versions aren't safe to assume: 5.7.2 heats the nozzle to 235 C before the start G-code runs, so PETG oozes while probing. You also need Python 3 and bash.
 
 ### Tramline, for printing
 
@@ -73,10 +85,10 @@ The server is already on the Pi, so a new computer only needs a client. It must 
    tramline/build.sh
    ```
 
-2. Create this computer's key. It stays on this computer, and the command prints only the public fingerprint:
+2. Create this computer's key, in `~/.config/tramline/` on Linux and macOS alike. It stays on this computer, and the command prints only the public fingerprint:
 
    ```bash
-   tramline/dist/tramline-linux-amd64 keygen
+   tramline/dist/tramline-linux-amd64 keygen    # on a Mac: tramline/dist/tramline-darwin-arm64
    ```
 
 3. On the Pi, get the server's fingerprint and allow the new client:

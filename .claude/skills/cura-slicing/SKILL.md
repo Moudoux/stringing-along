@@ -73,12 +73,15 @@ Change the shared `petg_profile.py` only when the user wants a new default. Then
 
 `slice_petg.sh` runs `petg_profile.py`, `resolve_settings.py`, `place_stl.py`, `slice.py` and `finish_gcode.py`. If it breaks, these are the causes already found:
 
-- `/opt/ultimaker-cura/CuraEngine` has a relative ELF interpreter, so it runs as `/lib64/ld-linux-x86-64.so.2 /opt/ultimaker-cura/CuraEngine` with `LD_LIBRARY_PATH=/opt/ultimaker-cura` and `CURA_ENGINE_SEARCH_PATH` set to the resources' `definitions` and `extruders`.
+- `slice_petg.sh` finds Cura and passes `CURA_ENGINE` and `CURA_RESOURCES` to the Python scripts, which can't run alone without them. On macOS the engine is `/Applications/UltiMaker Cura.app/Contents/Frameworks/CuraEngine`, which runs directly, and resources are under `Contents/Resources/share/cura/resources`.
+- On Linux, `/opt/ultimaker-cura/CuraEngine` has a relative ELF interpreter, so it runs as `/lib64/ld-linux-x86-64.so.2 /opt/ultimaker-cura/CuraEngine` with `LD_LIBRARY_PATH=/opt/ultimaker-cura` and `CURA_ENGINE_SEARCH_PATH` set to the resources' `definitions` and `extruders`.
 - The CLI only reads `default_value`, never `value` formulas, so every setting has to be resolved first, or it dies with `no value given: roofing_layer_count`.
 - `-s` and `key=value` must be separate arguments.
 - The engine centres the bed itself, so models are centred on (0,0), not (117.5,117.5).
 - The engine writes placeholders for `;TIME:` and `;Filament used:`, which `finish_gcode.py` replaces.
-- The scripts need bash, not zsh, for `mapfile`, and the Python ones run with `python3 -I`.
+- The scripts need bash, not zsh, and the Python ones run with `python3 -I`, so they can't import each other. macOS has bash 3.2, so don't use `mapfile` or other newer features.
+- Use Cura 5.13. Check for `M104 S150` before any `M109 S235` at the top of the G-code: 5.7.2 ignores `material_print_temp_prepend` for the nozzle, and heats to 235 before probing.
+- Every slice rewrites `cura/Ender3V2_PETG.curaprofile` with new timestamps, so git shows it changed when its contents haven't. Restore it with `git checkout` rather than committing it, unless the settings changed.
 - Files sliced before 2026-11-03 have a broken `G1 X0 Y{machine_depth}` in their end G-code, so re-slice those.
 
 ## Next step

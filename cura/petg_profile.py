@@ -1,9 +1,10 @@
 """Build an Ender 3 V2 PETG .curaprofile and the matching CuraEngine CLI args."""
 import json
+import os
 import sys
 import zipfile
 
-RES = "/opt/ultimaker-cura/share/cura/resources"
+RES = os.environ["CURA_RESOURCES"]
 OUT_DIR = sys.argv[1]
 PROFILE_NAME = "Ender 3 V2 PETG"
 

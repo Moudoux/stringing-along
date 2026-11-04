@@ -47,7 +47,7 @@ cd projects/pi4-ssd-case   # from the repository root, any project folder works
 bash ../../cura/slice_petg.sh tray-slide.stl pi-deck-slide.stl
 ```
 
-Uses Cura 5.13's engine at `/opt/ultimaker-cura`. Each STL gets a `*_PETG.gcode` next to it with the real print time in the header.
+Uses Cura 5.13's engine, from `/Applications/UltiMaker Cura.app` on macOS (or `CURA_APP`) and `/opt/ultimaker-cura` on Linux. Each STL gets a `*_PETG.gcode` next to it with the real print time in the header.
 
 ## History
 

@@ -6,6 +6,17 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 
+# Where Cura is on this machine. CURA_APP overrides the macOS app's location.
+if [ "$(uname -s)" = Darwin ]; then
+    CURA_APP=${CURA_APP:-"/Applications/UltiMaker Cura.app"}
+    export CURA_ENGINE="$CURA_APP/Contents/Frameworks/CuraEngine"
+    export CURA_RESOURCES="$CURA_APP/Contents/Resources/share/cura/resources"
+else
+    export CURA_ENGINE=/opt/ultimaker-cura/CuraEngine
+    export CURA_RESOURCES=/opt/ultimaker-cura/share/cura/resources
+fi
+[ -f "$CURA_ENGINE" ] || { echo "Cura's engine not found at $CURA_ENGINE" >&2; exit 1; }
+
 python3 -I "$HERE/petg_profile.py" "$HERE" >/dev/null
 sed -e 's/{material_bed_temperature_layer_0}/80/g' \
     -e 's/{material_print_temperature_layer_0}/235/g' \

@@ -6,10 +6,11 @@ usage: resolve_settings.py profile.curaprofile start_gcode.txt out_args.txt
 import configparser
 import json
 import math
+import os
 import sys
 import zipfile
 
-RES = "/opt/ultimaker-cura/share/cura/resources"
+RES = os.environ["CURA_RESOURCES"]
 profile_path, start_gcode_path, out_path = sys.argv[1:4]
 
 

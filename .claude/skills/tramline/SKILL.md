@@ -9,7 +9,7 @@ Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 at
 
 Paths here are relative to the repository root, the folder holding `.claude/`. Run commands from there, or adjust the path.
 
-- Client: `tramline/dist/tramline-linux-amd64`, which `tramline/build.sh` builds if it's missing. Run `help` on it for the full command list.
+- Client: `tramline/dist/tramline-linux-amd64` on the Linux desktop, or `tramline/dist/tramline-darwin-arm64` on the Mac. Work on either, and use the one for the machine you're on. `tramline/build.sh` builds it if it's missing. Run `help` on it for the full command list.
 - Source of truth: `tramline/ENGINEERING-NOTES.md`, with `tramline/README.md` as the short overview. Read the notes' "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
 - Web page: `tramline web` opens a read-only status and 3D print view at `http://192.168.1.121:8726/`, and `web --url` only shows the address. It needs no certificate and doesn't touch the printer. Its head position is worked out from the file position, not measured, and from the card that's only read about every 30 seconds.
 - Clocks: the Pi is on GMT, and this machine may be an hour ahead. Say which one a time is in.
@@ -91,7 +91,7 @@ Ask the user how the part came out and what the LCD showed, as Tramline can't se
 
 ## Changing Tramline
 
-- Build only with `./build.sh`, which runs in a container. Don't use Go on the host.
+- Build only with `./build.sh`, which runs in a container, so Docker has to be running (`open -a Docker` on a Mac). Don't use Go on the host. Tests only run on Linux, in that container; macOS gets `go vet` and a build. Macs build the client and `serve --sim`, and only Linux can open a real serial port.
 - gofmt runs inside `build.sh`, so format by hand.
 - Standard library only.
 - The engineering notes are the record, and the README stays a short overview, so only change it when how Tramline is used changes. The code is in the `stringing-along` git repository, and `test-logs/` and `dist/` aren't committed. Commit or push only when the user asks.
