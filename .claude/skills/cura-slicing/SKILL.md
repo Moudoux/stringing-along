@@ -7,7 +7,9 @@ description: Slice STL files into G-code for the user's Ender 3 V2 with Cura's e
 
 The printer is a Creality Ender 3 V2 with a stock Bowden extruder, a 0.4 mm nozzle and Professional Firmware with a probe (UBL). The usual material is PETG, on a thin flexible plate made for PETG. Cura slices for a 220 x 220 bed.
 
-The shared setup lives in `/home/user/Applications/Solidcraft/cura/`, not in each project. Its `README.md` lists the settings and why each was chosen, and `petg_profile.py` is the source of truth for the values.
+Paths here are relative to the repository root, the folder holding `.claude/`. Run commands from there, or adjust the path.
+
+The shared setup lives in `cura/`, not in each project. Its `README.md` lists the settings and why each was chosen, and `petg_profile.py` is the source of truth for the values.
 
 ## Slice
 
@@ -39,8 +41,8 @@ Check these before calling it done:
 The profile is a good default, so leave it alone unless the job needs something else. For one-off changes, work on a copy so the shared profile stays the same for later jobs:
 
 ```bash
-cp -r /home/user/Applications/Solidcraft/cura "$SCRATCH/cura-custom"
-# edit SETTINGS in "$SCRATCH/cura-custom/petg_profile.py"
+cp -r ../../cura "$SCRATCH/cura-custom"
+# run from the project folder, then edit SETTINGS in "$SCRATCH/cura-custom/petg_profile.py"
 bash "$SCRATCH/cura-custom/slice_petg.sh" part.stl
 ```
 

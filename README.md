@@ -37,13 +37,74 @@ These stay on the local machine, see [`.gitignore`](.gitignore):
 - `projects/`, the designs, STLs and G-code.
 - `tramline/dist/`, `tramline/.cache/` and `tramline/test-logs/`. The Tramline README refers to files in `test-logs/`, and those only exist locally.
 
-Tramline's keys stay out too, in `~/.config/tramline/` on the client and `/var/lib/tramline/` on the Pi.
+Tramline's keys stay out too, in `~/.config/tramline/` on the client and `/var/lib/tramline/` on the Pi. See [Setting up a new computer](#setting-up-a-new-computer) for how to replace what's missing.
 
-## Requirements
+## Setting up a new computer
 
-- **Slicing:** Cura 5.13 at `/opt/ultimaker-cura`, plus Python 3 and bash.
-- **Building Tramline:** Docker. Build only with `tramline/build.sh`, as it uses the Go standard library inside a container and needs no Go on the host.
-- **Printing:** an Ender 3 V2 running Professional Firmware with a probe, a Raspberry Pi, and a Hue plug.
+Claude Code picks up the skills by itself when started in this folder, but they rely on things git doesn't carry. Run these from the repository root.
+
+```bash
+git clone git@github.com:Moudoux/stringing-along.git
+cd stringing-along
+```
+
+### SolidCraft, for designing
+
+1. Copy the binaries `solidcraft`, `solidcraft-cli` and `solvecraft-cli` into the repository root from a computer that has them.
+2. Connect them to Claude Code:
+
+   ```bash
+   claude mcp add solidcraft -- "$PWD/solidcraft-cli" mcp
+   ```
+
+3. Copy `projects/` across too, if you want the existing designs.
+
+### Cura, for slicing
+
+Install Cura 5.13 at `/opt/ultimaker-cura`, the one path that isn't relative, as it's where the scripts expect Cura's engine. You also need Python 3 and bash.
+
+### Tramline, for printing
+
+The server is already on the Pi, so a new computer only needs a client. It must be on the same network as the Pi, and needs Docker to build.
+
+1. Build the client, which writes to `tramline/dist/`. Only use this script, as it needs no Go on the host:
+
+   ```bash
+   tramline/build.sh
+   ```
+
+2. Create this computer's key. It stays on this computer, and the command prints only the public fingerprint:
+
+   ```bash
+   tramline/dist/tramline-linux-amd64 keygen
+   ```
+
+3. On the Pi, get the server's fingerprint and allow the new client:
+
+   ```bash
+   sudo -u tramline tramline fingerprint
+   sudo -u tramline tramline allow <client-fingerprint> --name <computer-name>
+   ```
+
+4. Back on the new computer, log in and check it works:
+
+   ```bash
+   tramline/dist/tramline-linux-amd64 login https://192.168.1.121:8726 <server-fingerprint>
+   tramline/dist/tramline-linux-amd64 status
+   ```
+
+5. Add an SSH host called `raspberrypi` to `~/.ssh/config`, using user `pi`. Saving logs and `deploy/install.sh` both use it. The client itself doesn't need SSH.
+
+### Claude's rules and notes
+
+These stay on the original computer, in `~/.claude/`:
+
+- **Global rules:** `~/.claude/CLAUDE.md` holds the rules on never reading secrets, never running sudo, and handing off to a new session. The `tramline` skill repeats the first two, but only while that skill is in use, so copy the file across to keep them in every session.
+- **Memory:** Claude's notes aren't copied, so it starts without them. The READMEs and skills hold most of what matters.
+
+### Setting up a new Pi
+
+This is only needed if the Pi itself is replaced. See Security, Install and updates, Config and the test plan in the [Tramline README](tramline/README.md). In short: `deploy/install.sh <ssh-host>`, `tramline init --ip <address>` and `tramline hue pair` on the Pi, then fill in `/etc/tramline/config.json` with the plug's UUID from `tramline hue plugs`. These need sudo on the Pi, and the printer needs the USB cable with its +5V wire cut, see The USB cable in that README.
 
 ## Status
 

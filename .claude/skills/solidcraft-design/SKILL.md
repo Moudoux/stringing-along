@@ -9,7 +9,7 @@ SolidCraft has its own modelling guide built in, which covers command shapes, id
 
 ## Start
 
-1. **Start the app first,** so the user can watch the model appear. Run `/home/user/Applications/Solidcraft/solidcraft` in the background, unless it's already running. The MCP server stays headless once a session has work in it, so this has to come before any design call. Tell the user if the session is still headless.
+1. **Start the app first,** so the user can watch the model appear. Run `./solidcraft` from the repository root in the background, unless it's already running. The MCP server stays headless once a session has work in it, so this has to come before any design call. Tell the user if the session is still headless.
 2. **Read the built-in guide:** `skill_reference {"skill":"solidcraft-modeling"}` for the reference, and `file: "SKILL.md"` for the workflow. There are also `solidcraft-mechanisms`, `solidcraft-editing` and `solidcraft-checking`.
 3. **Run `inspect_design {"measure":false,"sketches":false}`** before `new_design` or `open`, and ask first if there's work in it, because both discard unsaved work.
 
@@ -17,7 +17,7 @@ If the MCP stays headless with the app running, `current.port` and `current.pid`
 
 ## Where files go
 
-Each project has its own folder, `/home/user/Applications/Solidcraft/projects/<name>/`, holding its design, STLs and G-code. Never leave them in the home folder.
+Each project has its own folder, `projects/<name>/` under the repository root, holding its design, STLs and G-code. Never leave them in the home folder.
 
 `save` and `export` may refuse paths outside their allowed folders, which the error names: the recovery folder under `~/.local/share/solidcraft/` and a `/tmp/solidcraft-mcp-...` folder that changes when the server restarts. If so, write there and `cp` the file into the project folder.
 

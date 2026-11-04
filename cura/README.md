@@ -43,7 +43,7 @@ Cura printer type: **Creality Ender-3 / Ender-3 v2**, material **Generic PETG**.
 ## Re-slicing from the command line
 
 ```bash
-cd /home/user/Applications/Solidcraft/projects/pi4-ssd-case   # any project folder works
+cd projects/pi4-ssd-case   # from the repository root, any project folder works
 bash ../../cura/slice_petg.sh tray-slide.stl pi-deck-slide.stl
 ```
 

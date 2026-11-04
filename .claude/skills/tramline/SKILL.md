@@ -7,8 +7,10 @@ description: Use the user's Tramline print server to run their Ender 3 V2 from a
 
 Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 at 192.168.1.121:8726 as the `tramline` systemd service, and talks to the printer over USB and to a Hue plug.
 
-- Client: `/home/user/Applications/Solidcraft/tramline/dist/tramline-linux-amd64`. Run `help` on it for the full command list.
-- Source of truth: `/home/user/Applications/Solidcraft/tramline/README.md`. Read its "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
+Paths here are relative to the repository root, the folder holding `.claude/`. Run commands from there, or adjust the path.
+
+- Client: `tramline/dist/tramline-linux-amd64`, which `tramline/build.sh` builds if it's missing. Run `help` on it for the full command list.
+- Source of truth: `tramline/README.md`. Read its "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
 - Clocks: the Pi is on GMT, and this machine may be an hour ahead. Say which one a time is in.
 
 ## Rules that always apply
@@ -27,7 +29,7 @@ Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 at
 3. Ask the user, in one message: can you confirm the bed is clear, and may I start? Give the file, the slicer time, and about 7 more minutes for heating, the tram check and the mesh.
 4. Upload if needed: `upload <file>`. The default `mode auto` copies to the card unless that would take over 5 minutes at about 14 KB/s, so files over about 4 MB stay on the Pi and stream.
 5. Start: `print <name> --bed-clear`. It returns straight away with the job in `heating`.
-6. Watch with `status` in the background, every 10 seconds or so, saved to a log in `test-logs/` if this is a test. When it's a long print, tell the user how to check back rather than holding the session.
+6. Watch with `status` in the background, every 10 seconds or so, saved to a log in `tramline/test-logs/` if this is a test. When it's a long print, tell the user how to check back rather than holding the session.
 7. When the job ends, report from `status` and the server log, as below.
 
 The job's states go `heating`, `soaking`, `checking`, `starting`, `running`, then `finished`, `cancelled` or `failed`. A failed check goes to `adjusting`.
@@ -72,7 +74,7 @@ After a Tramline cancel of a stream, the LCD says print done at 100%. Trust `tra
 Save the server log first, using the start time from the job:
 
 ```bash
-ssh raspberrypi "journalctl -u tramline --since 'YYYY-MM-DD HH:MM:SS' --no-pager -o short-precise" > test-logs/<date-name>/<test>/server.log
+ssh raspberrypi "journalctl -u tramline --since 'YYYY-MM-DD HH:MM:SS' --no-pager -o short-precise" > tramline/test-logs/<date-name>/<test>/server.log
 ```
 
 Kernel messages come from `ssh raspberrypi "journalctl -k --since '...' --no-pager"`, no sudo needed. During power tests, capture them live to a local file with `ssh raspberrypi 'journalctl -kf -o short-precise'`, and don't stop that with `pkill -f`.
