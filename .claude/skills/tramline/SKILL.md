@@ -5,13 +5,13 @@ description: Use the user's Tramline print server to run their Ender 3 V2 from a
 
 # Tramline
 
-Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 at 192.168.1.121:8726 as the `tramline` systemd service, and talks to the printer over USB and to a Hue plug.
+Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 as the `tramline` systemd service, on port 8726 at `raspberrypi`, and talks to the printer over USB and to a Hue plug. That name is the LAN address at home. The server follows the addresses of `eth0` and `tailscale0` rather than a fixed one (see the notes' "Listening by interface").
 
 Paths here are relative to the repository root, the folder holding `.claude/`. Run commands from there, or adjust the path.
 
 - Client: `tramline/dist/tramline-linux-amd64` on the Linux desktop, or `tramline/dist/tramline-darwin-arm64` on the Mac. Work on either, and use the one for the machine you're on. `tramline/build.sh` builds it if it's missing. Run `help` on it for the full command list.
 - Source of truth: `tramline/ENGINEERING-NOTES.md`, with `tramline/README.md` as the short overview. Read the notes' "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
-- Web page: `tramline web` opens a read-only status and 3D print view at `http://192.168.1.121:8726/`, and `web --url` only shows the address. It needs no certificate and doesn't touch the printer. Its head position is worked out from the file position, not measured, and from the card that's only read about every 30 seconds.
+- Web page: `tramline web` opens a read-only status and 3D print view at `http://raspberrypi:8726/`, and `web --url` only shows the address. It needs no certificate and doesn't touch the printer. Its head position is worked out from the file position, not measured, and from the card that's only read about every 30 seconds.
 - Clocks: the Pi is on GMT, and this machine may be an hour ahead. Say which one a time is in.
 
 ## Rules that always apply

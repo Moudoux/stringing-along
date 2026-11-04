@@ -101,7 +101,7 @@ The server is already on the Pi, so a new computer only needs a client. It must 
 4. Back on the new computer, log in and check it works:
 
    ```bash
-   tramline/dist/tramline-linux-amd64 login https://192.168.1.121:8726 <server-fingerprint>
+   tramline/dist/tramline-linux-amd64 login https://raspberrypi:8726 <server-fingerprint>
    tramline/dist/tramline-linux-amd64 status
    ```
 
