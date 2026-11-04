@@ -35,7 +35,7 @@ These stay on the local machine, see [`.gitignore`](.gitignore):
 
 - The SolidCraft binaries (`solidcraft`, `solidcraft-cli`, `solvecraft-cli`).
 - `projects/`, the designs, STLs and G-code.
-- `tramline/dist/`, `tramline/.cache/` and `tramline/test-logs/`. The Tramline README refers to files in `test-logs/`, and those only exist locally.
+- `tramline/dist/`, `tramline/.cache/` and `tramline/test-logs/`. Tramline's engineering notes refer to files in `test-logs/`, and those only exist locally.
 
 Tramline's keys stay out too, in `~/.config/tramline/` on the client and `/var/lib/tramline/` on the Pi. See [Setting up a new computer](#setting-up-a-new-computer) for how to replace what's missing.
 
@@ -104,8 +104,8 @@ These stay on the original computer, in `~/.claude/`:
 
 ### Setting up a new Pi
 
-This is only needed if the Pi itself is replaced. See Security, Install and updates, Config and the test plan in the [Tramline README](tramline/README.md). In short: `deploy/install.sh <ssh-host>`, `tramline init --ip <address>` and `tramline hue pair` on the Pi, then fill in `/etc/tramline/config.json` with the plug's UUID from `tramline hue plugs`. These need sudo on the Pi, and the printer needs the USB cable with its +5V wire cut, see The USB cable in that README.
+This is only needed if the Pi itself is replaced. See Security, Install and updates, Config and the test plan in [Tramline's engineering notes](tramline/ENGINEERING-NOTES.md). In short: `deploy/install.sh <ssh-host>`, `tramline init --ip <address>` and `tramline hue pair` on the Pi, then fill in `/etc/tramline/config.json` with the plug's UUID from `tramline hue plugs`. These need sudo on the Pi, and the printer needs the USB cable with its +5V wire cut, see The USB cable in that README.
 
 ## Status
 
-Tramline's stage 10 passed on the real printer on 2026-11-04, including a 63-minute streamed print. See the status table at the top of the [Tramline README](tramline/README.md) for what's proven on the printer and what has only run on the simulator.
+Tramline's stage 10 passed on the real printer on 2026-11-04, including a 63-minute streamed print. See the status table at the top of [Tramline's engineering notes](tramline/ENGINEERING-NOTES.md) for what's proven on the printer and what has only run on the simulator.

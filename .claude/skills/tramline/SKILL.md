@@ -10,7 +10,8 @@ Tramline is the user's small Go print server. It runs on their Raspberry Pi 4 at
 Paths here are relative to the repository root, the folder holding `.claude/`. Run commands from there, or adjust the path.
 
 - Client: `tramline/dist/tramline-linux-amd64`, which `tramline/build.sh` builds if it's missing. Run `help` on it for the full command list.
-- Source of truth: `tramline/README.md`. Read its "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
+- Source of truth: `tramline/ENGINEERING-NOTES.md`, with `tramline/README.md` as the short overview. Read the notes' "Next session" section before working on Tramline itself, and treat it as newer than this skill where they differ.
+- Web page: `tramline web` opens a read-only status and 3D print view at `http://192.168.1.121:8726/`, and `web --url` only shows the address. It needs no certificate and doesn't touch the printer. Its head position is worked out from the file position, not measured, and from the card that's only read about every 30 seconds.
 - Clocks: the Pi is on GMT, and this machine may be an hour ahead. Say which one a time is in.
 
 ## Rules that always apply
@@ -20,7 +21,7 @@ Paths here are relative to the repository root, the folder holding `.claude/`. R
 - **Never read secrets,** here or on the Pi: `~/.config/tramline/client.key`, and `hue.key` and `tls.key` in `/var/lib/tramline/`. Running the client is fine, as it uses them without printing them.
 - **Never run sudo on the Pi,** and don't use Docker to get around it. Give the user the exact command to run: `deploy/install.sh raspberrypi`, restarting the service, or editing `/etc/tramline/config.json`. Ask before any lasting change on the Pi and list what it changes.
 - **Don't restart or install during a stream,** as a stream can't survive it.
-- **Be plain about what has only run on the simulator.** The README's table and "Not proven on the real printer" list say which is which.
+- **Be plain about what has only run on the simulator.** The engineering notes' table and "Not proven on the real printer" list say which is which.
 
 ## Printing a file
 
@@ -86,13 +87,14 @@ Then report the outcome, the print time against the slicer's, and:
 - `stream: ok times`: mean, longest and planner free. Near 0 free means the planner stayed full. Empty during moves would mean the link starved it.
 - Errors, kernel messages and `stream: printer said` lines. Replies from the printer are occasionally damaged, and a `planner free` over 15 is one of those rather than a real figure.
 
-Ask the user how the part came out and what the LCD showed, as Tramline can't see either. Record results in the README, including its status line, table and "Next session".
+Ask the user how the part came out and what the LCD showed, as Tramline can't see either. Record results in the engineering notes, including its status line, table and "Next session".
 
 ## Changing Tramline
 
 - Build only with `./build.sh`, which runs in a container. Don't use Go on the host.
 - gofmt runs inside `build.sh`, so format by hand.
 - Standard library only.
-- The README is the record. The code is in the `stringing-along` git repository, and `test-logs/` and `dist/` aren't committed. Commit or push only when the user asks.
+- The engineering notes are the record, and the README stays a short overview, so only change it when how Tramline is used changes. The code is in the `stringing-along` git repository, and `test-logs/` and `dist/` aren't committed. Commit or push only when the user asks.
 - The user installs new builds with `deploy/install.sh raspberrypi`. Check that `status` shows the expected server version afterwards.
-- The simulator differs from the real firmware in known ways, listed under "Streaming design" in the README, so a pass there doesn't settle anything about timing or the receive buffer.
+- `go test` doesn't run the web page's JavaScript, in `internal/server/web/`, so check a change to it in a browser. `./sim-web.sh [--sd] [--minutes <n>] [--no-open] [--lan] <file>` runs a print on a simulated printer on this machine, with a throwaway login, and touches neither the Pi nor the printer. See "Trying it on the simulator" in the engineering notes.
+- The simulator differs from the real firmware in known ways, listed under "Streaming design" in the engineering notes, so a pass there doesn't settle anything about timing or the receive buffer.
