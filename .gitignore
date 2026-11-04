@@ -1,0 +1,25 @@
+# SolidCraft binaries
+/solidcraft
+/solidcraft-cli
+/solvecraft-cli
+
+# Design projects: models, STLs and G-code
+/projects/
+
+# Tramline: build output, build cache and printer test logs
+/tramline/dist/
+/tramline/.cache/
+/tramline/test-logs/
+
+# Secrets, in case one ever lands here
+*.key
+*.pem
+.env
+.env.*
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc
