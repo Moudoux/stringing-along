@@ -21,12 +21,12 @@ Design a part, slice it and print it on an Ender 3 V2, with Claude Code driving 
    ```
 
    This writes `part_PETG.gcode` next to the STL.
-3. **Print** with Tramline. It always checks tram first, and asks for confirmation that the bed is clear:
+3. **Print** with Tramline. It turns the printer on, always checks tram first, needs your confirmation that the bed is clear, and turns the printer off afterwards. See [Tramline's README](tramline/README.md#printing) for printing from the card instead:
 
    ```bash
    cd tramline
    dist/tramline-linux-amd64 upload part_PETG.gcode
-   dist/tramline-linux-amd64 print part_PETG.gcode --bed-clear
+   dist/tramline-linux-amd64 print part_PETG.gcode --from pi --bed-clear
    ```
 
    On a Mac the client is `dist/tramline-darwin-arm64`.

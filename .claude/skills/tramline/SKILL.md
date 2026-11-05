@@ -1,6 +1,6 @@
 ---
 name: tramline
-description: Use the user's Tramline print server to run their Ender 3 V2 from a Raspberry Pi, covering printer status, plug power, preheat and cool, tram checks, uploading G-code, copying to the SD card, starting, watching, cancelling and reporting prints, and testing or changing Tramline itself. Use this whenever the user wants something printed or asks about the printer, the bed, a running print, the plug or the Pi print server, even if they don't say "Tramline".
+description: Use the user's Tramline print server to run their Ender 3 V2 from a Raspberry Pi, covering printer status, plug power, preheat and cool, tram checks, uploading G-code, copying to the SD card, starting, scheduling, watching, cancelling and reporting prints, and testing or changing Tramline itself. Use this whenever the user wants something printed or asks about the printer, the bed, a running print, the plug or the Pi print server, even if they don't say "Tramline".
 ---
 
 # Tramline
@@ -16,7 +16,7 @@ Paths here are relative to the repository root, the folder holding `.claude/`. R
 
 ## Rules that always apply
 
-- **Ask before anything that touches the printer,** including switching the plug, heating, moving, tram checks, copies and prints. Say what it will do and how long it should take. Approval covers only what was described, so ask again next time. `status` and `files` are read-only and need no approval.
+- **Ask before anything that touches the printer,** including switching the plug, heating, moving, tram checks, copies and prints. Say what it will do and how long it should take. Approval covers only what was described, so ask again next time. `status`, `files` and `schedule list` are read-only and need no approval.
 - **Ask the user to confirm the bed is clear before every print and tram check.** There's no camera, and a finished print may still be on the bed. Only pass `--bed-clear` after they confirm it for this run.
 - **Never read secrets,** here or on the Pi: `~/.config/tramline/client.key`, and `hue.key` and `tls.key` in `/var/lib/tramline/`. Running the client is fine, as it uses them without printing them.
 - **Never run sudo on the Pi,** and don't use Docker to get around it. Give the user the exact command to run: `deploy/install.sh raspberrypi`, restarting the service, or editing `/etc/tramline/config.json`. Ask before any lasting change on the Pi and list what it changes.
@@ -27,23 +27,41 @@ Paths here are relative to the repository root, the folder holding `.claude/`. R
 
 1. Run `status`. Stop if a job is already running or waiting.
 2. Check `files` for the name. If this is a new or changed file, check its slicer time in the header (`;TIME:`, in seconds).
-3. Ask the user, in one message: can you confirm the bed is clear, and may I start? Give the file, the slicer time, and about 7 more minutes for heating, the tram check and the mesh.
-4. Upload if needed: `upload <file>`. The default `mode auto` copies to the card unless that would take over 5 minutes at about 14 KB/s, so files over about 4 MB stay on the Pi and stream.
-5. Start: `print <name> --bed-clear`. It returns straight away with the job in `heating`.
+3. Ask the user, in one message: can you confirm the bed is clear, and may I start? Give the file, the route, the slicer time, and about 7 more minutes for heating, the tram check and the mesh. Say the printer turns off by itself at the end.
+4. Upload if needed: `upload <path>`, which only saves on the Pi. Choose the route, see below: `--from pi`, or for `--from sd` run `copy <file>` first, with the printer on. Copies run at about 14 KB/s, so over about 4 MB is better from the Pi.
+5. Start: `print <file> --from pi|sd --bed-clear`. It switches the plug on if needed, and returns once the job is in `heating`, which may take 20 seconds from off. When the job ends, however it ended, the server turns the heaters off and cuts the plug once the nozzle is below 50°C.
 6. Watch with `status` in the background, every 10 seconds or so, saved to a log in `tramline/test-logs/` if this is a test. When it's a long print, tell the user how to check back rather than holding the session.
 7. When the job ends, report from `status` and the server log, as below.
 
-The job's states go `heating`, `soaking`, `checking`, `starting`, `running`, then `finished`, `cancelled` or `failed`. A failed check goes to `adjusting`.
+The job's states go `heating`, `soaking`, `checking`, `starting`, `running`, then `finished`, `cancelled` or `failed`. A failed check goes to `adjusting`. The tram check made when scheduling ends as `scheduled` instead of starting the file.
 
 ### A failed tram check
 
-The limit is 0.05 mm, and this bed sits close to it, at 0.029 to 0.055 mm. A fail isn't an error: nothing has started, and the head is parked. Tell the user the corner, the direction and the numbers that `status` gives, wait for them to say it's adjusted, then run `print --continue`, which checks again. There's no override, and the user doesn't want one.
+The limit is 0.05 mm, and this bed sits close to it, at 0.029 to 0.055 mm. A fail isn't an error: nothing has started, and the head is parked, and if they `cancel` from here the printer turns off once cool. Tell the user the corner, the direction and the numbers that `status` gives, wait for them to say it's adjusted, then run `print --continue`, which checks again. There's no override, and the user doesn't want one.
+
+### Scheduling a print
+
+For "schedule this print at 6 am tomorrow":
+
+1. Run `date` here, and work out the full date and time in this machine's timezone. The Pi's clock doesn't matter, as the client sends an absolute time.
+2. Run `status` and `files`, and upload the file if needed, as for a print. It has to be on the Pi first.
+3. Ask, in one message: can you confirm the bed is clear and will stay clear, and may I start? Read the date back in full, such as "Friday 6 November at 06:00 GMT". Say that it heats and checks tram now, about 5 minutes, then powers off, then at that time powers on, checks again and prints unattended, and powers off afterwards, as every print does.
+4. Run `schedule <file> --from pi|sd --at "YYYY-MM-DD HH:MM" --bed-clear`. Choose the route as for a print, and `--from sd` needs its `copy` first. Watch `status`, as for a print. A failed first check is handled the same way, with `print --continue`.
+5. Report once `schedule list` says `waiting` and `status` shows the plug off.
+
+The time must be 15 minutes to 30 days away. `schedule list` shows what's waiting and how recent ones ended, with the reason and readings, and `status` and the web page show them too. `schedule cancel <id>` needs no bed check, but ask first if the job is heating or moving. A print that's already running is stopped with `cancel`.
+
+- **Tell the user:** a failed check at the scheduled time cancels the print with no retry, and nothing notifies them, so they should check `schedule list`.
+- **Only the most recent bed-clear counts:** if any print starts after a schedule was made, that schedule cancels itself without moving. So a second scheduled print only runs if it's scheduled after the first's part has been removed. Warn the user of that when they queue more than one, and before starting a normal print while one is waiting.
+- **Files:** `files rm` and uploads over a file are refused while a schedule needs it.
+- **Over 15 minutes late,** because the server was down, it's `missed` and doesn't start.
+- **Don't install a new build close to a scheduled time,** or while one is printing by stream.
 
 ### Which route a file takes
 
-- A file verified on the card prints from the card, even under `mode stream`.
-- Anything else streams from the Pi, one line at a time.
-- To stream a file already verified on the card, use a new name uploaded with `--pi-only`.
+- `print` and `schedule` always take `--from pi` or `--from sd`, and neither falls back to the other.
+- `--from pi` streams one line at a time, even if the file is verified on the card.
+- `--from sd` is refused unless the file has a verified copy on the card, from `copy`.
 - `copy` skips a file already verified on the card, so testing a copy also needs a new name.
 
 ### Stopping a print
@@ -61,7 +79,7 @@ After a Tramline cancel of a stream, the LCD says print done at 100%. Trust `tra
 
 ### Power
 
-`power off` refuses until the nozzle is below 50 C, or during a print. An automatic permission check has blocked Claude's `power` command before. If that happens, don't work around it: ask the user to run the command or switch the plug.
+Every print Tramline starts ends with the plug cut once the nozzle is below 50 C, so there's rarely a need to run `power off`. `print` and `schedule` switch it on themselves, and `copy`, `preheat` and `tram` still need `power on` first. That cut waits if the link is down, and stops for good if someone heats, trams, copies or runs `power on` first. Prints from the LCD don't get it. `power off` refuses until the nozzle is below 50 C, or during a print. An automatic permission check has blocked Claude's `power` command before. If that happens, don't work around it: ask the user to run the command or switch the plug.
 
 ## Traps
 
