@@ -10,6 +10,25 @@ Design a part, slice it and print it on an Ender 3 V2, with Claude Code driving 
 | [`cura/`](cura/README.md) | The tuned PETG profile, start G-code and scripts that slice STLs with Cura's engine from the command line. |
 | `.claude/skills/` | Claude Code skills for this project: `solidcraft-design`, `cura-slicing` and `tramline`. |
 
+## Download Tramline
+
+Prebuilt binaries from the [latest release](https://github.com/Moudoux/stringing-along/releases/latest). The Pi runs the server from the same program that other computers use as the client:
+
+- [Linux arm64](https://github.com/Moudoux/stringing-along/releases/latest/download/tramline-linux-arm64), for the Raspberry Pi
+- [Linux x86_64](https://github.com/Moudoux/stringing-along/releases/latest/download/tramline-linux-amd64)
+- [macOS arm64](https://github.com/Moudoux/stringing-along/releases/latest/download/tramline-darwin-arm64)
+- [SHA256SUMS](https://github.com/Moudoux/stringing-along/releases/latest/download/SHA256SUMS)
+
+Check the download and make it executable before installing it as `tramline` on your PATH, for example on a Mac:
+
+```bash
+shasum -a 256 -c --ignore-missing SHA256SUMS
+chmod +x tramline-darwin-arm64
+mv tramline-darwin-arm64 ~/.local/bin/tramline
+```
+
+On Linux, use `sha256sum` instead of `shasum -a 256`. The binaries aren't signed, so on a Mac, a copy downloaded in a browser also needs `xattr -d com.apple.quarantine ~/.local/bin/tramline` before it will run. Building it yourself with `just tramline/install` works too, see [Tramline, for printing](#tramline-for-printing).
+
 ## How it fits together
 
 1. **Design** in SolidCraft, a parametric CAD app, through its MCP server. Each design lives in `projects/<name>/`.
