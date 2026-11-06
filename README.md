@@ -24,12 +24,11 @@ Design a part, slice it and print it on an Ender 3 V2, with Claude Code driving 
 3. **Print** with Tramline. It turns the printer on, always checks tram first, needs your confirmation that the bed is clear, and turns the printer off afterwards. See [Tramline's README](tramline/README.md#printing) for printing from the card instead:
 
    ```bash
-   cd tramline
-   dist/tramline-linux-amd64 upload part_PETG.gcode
-   dist/tramline-linux-amd64 print part_PETG.gcode --from pi --bed-clear
+   tramline upload part_PETG.gcode
+   tramline print part_PETG.gcode --from pi --bed-clear
    ```
 
-   On a Mac the client is `dist/tramline-darwin-arm64`.
+   `tramline` is the client that `just install` puts on the PATH, see [Tramline, for printing](#tramline-for-printing).
 
 ## Not in this repository
 
@@ -77,18 +76,20 @@ Older versions aren't safe to assume: 5.7.2 heats the nozzle to 235 C before the
 
 ### Tramline, for printing
 
-The server is already on the Pi, so a new computer only needs a client. It must be on the same network as the Pi, and needs Docker to build.
+The server is already on the Pi, so a new computer only needs a client. It must be on the same network as the Pi, and needs Docker and [just](https://github.com/casey/just) to build.
 
-1. Build the client, which writes to `tramline/dist/`. Only use this script, as it needs no Go on the host:
+1. Build the client and install it as `tramline` in `~/.local/bin`. This runs `tramline/build.sh`, which builds in Docker and needs no Go on the host:
 
    ```bash
-   tramline/build.sh
+   just tramline/install
    ```
+
+   Set `TRAMLINE_BINDIR` to install somewhere else. `~/.local/bin` has to be on your PATH. Ubuntu and Fedora add it by default, but macOS and Arch don't, so add `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc` or `~/.bashrc` there. Run it again after pulling changes.
 
 2. Create this computer's key, in `~/.config/tramline/` on Linux and macOS alike. It stays on this computer, and the command prints only the public fingerprint:
 
    ```bash
-   tramline/dist/tramline-linux-amd64 keygen    # on a Mac: tramline/dist/tramline-darwin-arm64
+   tramline keygen
    ```
 
 3. On the Pi, get the server's fingerprint and allow the new client:
@@ -101,8 +102,8 @@ The server is already on the Pi, so a new computer only needs a client. It must 
 4. Back on the new computer, log in and check it works:
 
    ```bash
-   tramline/dist/tramline-linux-amd64 login https://raspberrypi:8726 <server-fingerprint>
-   tramline/dist/tramline-linux-amd64 status
+   tramline login https://raspberrypi:8726 <server-fingerprint>
+   tramline status
    ```
 
 5. Add an SSH host called `raspberrypi` to `~/.ssh/config`, using user `pi`. Saving logs and `deploy/install.sh` both use it. The client itself doesn't need SSH.
