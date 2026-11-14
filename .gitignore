@@ -11,6 +11,9 @@
 /tramline/.cache/
 /tramline/test-logs/
 
+# Private notes: device IDs and incident logs kept off GitHub
+/tramline/notes/private/
+
 # Secrets, in case one ever lands here
 *.key
 *.pem
